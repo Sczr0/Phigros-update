@@ -1,35 +1,50 @@
-name: ci
+name: Auto Update Phigros Info
+
+# 定义触发条件：每日触发或手动触发
 on:
   schedule:
-      - cron: '0 22 * * *'
-  watch:
-      types: [started]
-  workflow_dispatch:
+    - cron: '0 12 * * *'  # 每天中午12点运行
+  workflow_dispatch:      # 手动触发支持
+
 jobs:
-  deploy:
+  update:
     runs-on: ubuntu-latest
+
+    # 设置权限，允许对仓库内容进行写操作
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-      - run: python3 get_version.py
-      # - run: mkdocs gh-deploy --force
-      - name: commit
-        env:
-          TZ: 'CST-8'
-          emails: ${{ secrets.GITHUB_EMAIL }}
-        run: |
-          sudo timedatectl set-timezone Asia/Shanghai
-          git config --global user.email emails
-          git config --global user.name GithubActionBot
-          datime=$(date "+%Y年%m月%d日 %H:%M")
-          echo "git commit: push something, $datime"
-          if [ -n "$(git status -s)" ];then
-              git add .
-              git commit -m "make:action push $datime" -a
-          fi
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4
+
+    - name: Run update script
+      run: |
+        echo "Running update script..."
+        python get_version.py  # 运行更新脚本
+
+    - name: Commit changes
+      run: |
+        echo "Committing changes..."
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add version_info.json
+        git commit -m "Update version info"
+        git push
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Push changes
+      run: |
+        git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+        git push origin main
