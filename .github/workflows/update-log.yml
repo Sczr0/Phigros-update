@@ -25,4 +25,5 @@ jobs:
 
     - name: Run update script
       run: |
-        echo "
+        echo "Running update script..."
+        python get_version.py  # 运行更新脚本
