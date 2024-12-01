@@ -1,4 +1,4 @@
-name: Sync to GitLab via SSH
+name: Auto Update and Sync to GitLab
 
 on:
   schedule:
@@ -6,28 +6,35 @@ on:
   workflow_dispatch:  # 允许手动触发工作流
 
 jobs:
-  update:
+  update_and_sync:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: 检出代码
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # 获取完整历史记录，确保后续操作无问题
 
+    # Step 2: 设置 Python 环境
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
+    # Step 3: 安装依赖
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install requests beautifulsoup4
 
+    # Step 4: 运行更新脚本
     - name: Run update script
       run: |
         echo "Running update script..."
-        python get_version.py  # 运行更新脚本
+        python get_version.py  # 运行您的更新脚本
 
+    # Step 5: 设置 SSH 密钥
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
@@ -35,14 +42,18 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
 
+    # Step 6: 添加 GitLab 远程仓库
     - name: Add GitLab remote
       run: git remote add gitlab git@gitlab.com:Sczr0/phigros-upd.git
 
+    # Step 7: 从 GitLab 获取内容
     - name: Fetch from GitLab
       run: git fetch gitlab
 
+    # Step 8: 合并变更
     - name: Merge changes
       run: git merge origin/main || echo "No changes to merge"
 
-    - name: Mirror push to GitLab
-      run: git push --mirror gitlab
+    # Step 9: 推送到 GitLab
+    - name: Push to GitLab
+      run: git push --force gitlab main
