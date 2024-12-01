@@ -17,6 +17,8 @@ jobs:
       - name: Push to GitLab
         run: |
           git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
+          git config --global credential.helper store
+          echo "https://gitlab-ci-token:${{ secrets.GITLAB_TOKEN }}@gitlab.com" > ~/.git-credentials
           git push --mirror gitlab
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
