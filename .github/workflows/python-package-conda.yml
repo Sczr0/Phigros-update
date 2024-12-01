@@ -1,33 +1,37 @@
-name: Mirror to GitLab
+name: Mirror GitHub to GitLab
 
 on:
   push:
     branches:
-      - main  # 监视主分支的推送
-  schedule:
-    - cron: '0 12 * * *'  # 每天午夜运行（根据需要调整）
+      - main   # 当 GitHub 上的 `main` 分支有更改时触发
+  workflow_dispatch:  # 手动触发工作流
 
 jobs:
   mirror:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0  # 获取完整历史
+      # 第一步：Checkout GitHub 仓库
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v2
 
-    - name: Set up GitLab credentials
-      run: |
-        git config --global user.name "Sczr0"
-        git config --global user.email "sczr0710@163.com"
-        git config --global credential.helper store
-        echo "https://${{ secrets.GITLAB_TOKEN }}:x-oauth-basic@gitlab.com" > ~/.git-credentials
+      # 第二步：配置 Git
+      - name: Set up Git configuration
+        run: |
+          git config --global user.name "Sczr0"
+          git config --global user.email "sczr0710@163.com"
+          git config --global credential.helper store
+          
+          # 配置 GitLab 访问凭证
+          echo "https://${{ secrets.GITLAB_TOKEN }}:x-oauth-basic@gitlab.com" > ~/.git-credentials
 
-    - name: Add GitLab remote
-      run: git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
+      # 第三步：添加 GitLab 远程仓库
+      - name: Add GitLab remote repository
+        run: git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
 
-    - name: Push to GitLab
-      run: |
-        git fetch gitlab
-        git push --mirror gitlab  # 使用镜像推送到 GitLab
+      # 第四步：推送内容到 GitLab
+      - name: Push to GitLab
+        run: |
+          git fetch gitlab
+          git push --mirror gitlab   # 使用 --mirror 选项将所有分支和标签同步到 GitLab
+
