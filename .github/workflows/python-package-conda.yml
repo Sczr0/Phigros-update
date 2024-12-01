@@ -44,5 +44,5 @@ jobs:
     - name: Merge changes
       run: git merge origin/main || echo "No changes to merge"
 
-    - name: Push to GitLab
-      run: git push gitlab main
+    - name: Mirror push to GitLab
+      run: git push --mirror gitlab
