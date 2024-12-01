@@ -1,4 +1,4 @@
-name: Sync to GitLab
+name: Sync to GitLab via SSH
 
 on:
   schedule:
@@ -28,15 +28,15 @@ jobs:
         echo "Running update script..."
         python get_version.py  # 运行更新脚本
 
-    - name: Set up GitLab credentials
+    - name: Set up SSH key
       run: |
-        git config --global user.name "Sczr0"
-        git config --global user.email "sczr0710@163.com"
-        git config --global credential.helper store
-        echo "https://${{ secrets.GITLAB_TOKEN }}:x-oauth-basic@gitlab.com" > ~/.git-credentials
+        mkdir -p ~/.ssh
+        echo "${{ secrets.GITLAB_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
 
     - name: Add GitLab remote
-      run: git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
+      run: git remote add gitlab git@gitlab.com:Sczr0/phigros-upd.git
 
     - name: Fetch from GitLab
       run: git fetch gitlab
@@ -45,13 +45,4 @@ jobs:
       run: git merge origin/main || echo "No changes to merge"
 
     - name: Push to GitLab
-      run: |
-        git push gitlab main
-      env:
-        GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-
-    - name: Commit and push version info
-      run: |
-        git add version_info.json
-        git commit -m "Update version info"
-        git push gitlab main
+      run: git push gitlab main
