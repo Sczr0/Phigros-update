@@ -1,13 +1,18 @@
 name: Auto Update and Sync to GitLab
 
 on:
-  schedule:
-    - cron: '0 12 * * *'  # 每天运行一次
-  workflow_dispatch:  # 允许手动触发工作流
+  push:
+    branches:
+      - main  # 当推送到 main 分支时触发
+  workflow_dispatch:  # 手动触发支持
 
 jobs:
   update_and_sync:
     runs-on: ubuntu-latest
+
+    # 设置权限，允许对仓库内容进行写操作
+    permissions:
+      contents: write
 
     steps:
     # Step 1: 检出代码
@@ -34,7 +39,25 @@ jobs:
         echo "Running update script..."
         python get_version.py  # 运行您的更新脚本
 
-    # Step 5: 设置 SSH 密钥
+    # Step 5: 提交更改
+    - name: Commit changes
+      run: |
+        echo "Committing changes..."
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add version_info.json
+        git commit -m "Update version info"
+        git push
+      env:
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Step 6: 推送更改到 GitHub
+    - name: Push changes to GitHub
+      run: |
+        git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+        git push origin main
+
+    # Step 7: 设置 SSH 密钥（用于 GitLab）
     - name: Set up SSH key
       run: |
         mkdir -p ~/.ssh
@@ -42,18 +65,18 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
 
-    # Step 6: 添加 GitLab 远程仓库
+    # Step 8: 添加 GitLab 远程仓库
     - name: Add GitLab remote
       run: git remote add gitlab git@gitlab.com:Sczr0/phigros-upd.git
 
-    # Step 7: 从 GitLab 获取内容
+    # Step 9: 从 GitLab 获取内容
     - name: Fetch from GitLab
       run: git fetch gitlab
 
-    # Step 8: 合并变更
+    # Step 10: 合并内容
     - name: Merge changes
       run: git merge origin/main || echo "No changes to merge"
 
-    # Step 9: 推送到 GitLab
+    # Step 11: 强制推送到 GitLab
     - name: Push to GitLab
       run: git push --force gitlab main
