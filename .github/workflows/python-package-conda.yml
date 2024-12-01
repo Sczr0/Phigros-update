@@ -5,7 +5,7 @@ on:
     branches:
       - main  # 监视主分支的推送
   schedule:
-    - cron: '0 0 * * *'  # 每天午夜运行（根据需要调整）
+    - cron: '0 12 * * *'  # 每天午夜运行（根据需要调整）
 
 jobs:
   mirror:
@@ -21,8 +21,7 @@ jobs:
       run: |
         git config --global user.name "Sczr0"
         git config --global user.email "sczr0710@163.com"
-        git config --global credential.helper store
-        echo "https://${{ secrets.GITLAB_TOKEN }}@gitlab.com" > ~/.git-credentials
+        echo "https://${{ secrets.GITLAB_TOKEN }}:x-oauth-basic@gitlab.com" > ~/.git-credentials
 
     - name: Add GitLab remote
       run: git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
