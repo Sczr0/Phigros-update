@@ -30,10 +30,10 @@ jobs:
 
     - name: Set up GitLab credentials
       run: |
-        git config --global user.name "Sczr0"
-        git config --global user.email "sczr0710@163.com"
-        git config --global credential.helper store
-        echo "https://${{ secrets.GITLAB_TOKEN }}:x-oauth-basic@gitlab.com" > ~/.git-credentials
+      git config --global user.name "Sczr0"
+      git config --global user.email "sczr0710@163.com"
+      git config --global credential.helper store
+      echo "https://${{ secrets.GITLAB_TOKEN }}:x-oauth-basic@gitlab.com" > ~/.git-credentials
 
     - name: Add GitLab remote
       run: git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
