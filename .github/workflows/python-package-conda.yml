@@ -1,0 +1,22 @@
+name: Sync to GitLab
+
+on:
+  push:
+    branches:
+      - main  # 触发同步的分支
+  schedule:
+    - cron: '0 0 * * *'  # 每天运行一次
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v2
+
+      - name: Push to GitLab
+        run: |
+          git remote add gitlab https://gitlab.com/Sczr0/phigros-upd.git
+          git push --mirror gitlab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
