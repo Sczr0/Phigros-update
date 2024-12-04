@@ -1,6 +1,8 @@
 name: Auto Update and Sync to GitLab
 
 on:
+  schedule:
+    - cron: '0 11 * * *'  # 每天中午12点运行
   push:
     branches:
       - main  # 当推送到 main 分支时触发
