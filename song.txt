@@ -1,13 +1,9 @@
-3.10.3
-白と黒のバケモノ
-  EZ 4 231
-  HD 11.4 914
-  IN 15.7 1197
-Devotion
-  EZ 4.5 317
-  HD 9.8 657
-  IN 13.9 793
-Kirakira Noel Story!!
-  EZ 4 268
-  HD 10.2 626
-  IN 14.2 935
+3.10.4
+Shelter
+  EZ 3.5 265
+  HD 9.3 388
+  IN 13.1 696
+蝎虎天体 -Lacertid-
+  EZ 4.5 273
+  HD 10.7 596
+  IN 15.5 1238
